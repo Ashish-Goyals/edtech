@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import TaskForm from "../../components/TaskForm";
 import TaskCard from "../../components/TaskCard";
+import { ITask } from "@/lib/models/Task"; 
+import { IUser } from "@/lib/models/User";
 
 export default function Dashboard() {
-  const [resources, setResources] = useState([]);
-  const [editing, setEditing] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [resources, setResources] = useState<ITask[]>([]);
+  const [editing, setEditing] = useState<ITask | null>(null);
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
 
   const load = async () => {
     try {
@@ -23,7 +25,7 @@ export default function Dashboard() {
     (async () => {
       await load();
       try {
-        const me = await api.get('/api/auth/me');
+        const me = await api.get("/api/auth/me");
         setCurrentUser(me.data?.user || null);
       } catch (e) {
         setCurrentUser(null);
@@ -31,7 +33,7 @@ export default function Dashboard() {
     })();
   }, []);
 
-  const create = async (data) => {
+  const create = async (data: Partial<ITask>) => {
     try {
       await api.post("/api/task", data);
       await load();
@@ -40,7 +42,7 @@ export default function Dashboard() {
     }
   };
 
-  const update = async (data) => {
+  const update = async (data: ITask) => {
     if (!data?._id) return;
     try {
       await api.put(`/api/task/${data._id}`, data);
@@ -51,7 +53,7 @@ export default function Dashboard() {
     }
   };
 
-  const del = async (id) => {
+  const del = async (id: string) => {
     try {
       await api.delete(`/api/task/${id}`);
       await load();
@@ -65,7 +67,7 @@ export default function Dashboard() {
       <h2 className="text-2xl mb-4">Dashboard</h2>
 
       <div className="mb-6">
-        <TaskForm key={"new"} submitLabel="Add Resource" onSubmit={create} />
+        <TaskForm key={"new"} submitLabel="Add Task" onSubmit={create} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -75,7 +77,7 @@ export default function Dashboard() {
             task={r}
             onEdit={setEditing}
             onDelete={del}
-            isAdmin={currentUser?.role === 'admin'}
+            isAdmin={currentUser?.role === "admin"}
           />
         ))}
       </div>

@@ -16,7 +16,10 @@ interface Context {
   params: { id: string };
 }
 
-export async function PUT(req: NextRequest, context: Context) {
+export async function PUT(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
   await connectDB();
 
   try {
@@ -25,18 +28,29 @@ export async function PUT(req: NextRequest, context: Context) {
 
     const updated = (await Task.findByIdAndUpdate(id, data, {
       new: true,
+      runValidators: true,
     })) as ITask | null;
 
     if (!updated) {
-      return NextResponse.json({ message: "Task not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Task not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(updated);
+    return NextResponse.json(updated, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return NextResponse.json({ message: error.message }, { status: 500 });
+      return NextResponse.json(
+        { message: error.message },
+        { status: 500 }
+      );
     }
-    return NextResponse.json({ message: "Unknown error" }, { status: 500 });
+
+    return NextResponse.json(
+      { message: "Unknown error" },
+      { status: 500 }
+    );
   }
 }
 

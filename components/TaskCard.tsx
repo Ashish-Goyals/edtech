@@ -24,19 +24,19 @@ export default function TaskCard({
 }: TaskCardProps) {
   return (
     <article className="group relative w-full rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-      {/* Title */}
+    
       <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition">
         {task.title}
       </h3>
 
-      {/* Description */}
+     
       {task.description && (
         <p className="mt-2 text-sm text-gray-600 line-clamp-2">
           {task.description}
         </p>
       )}
 
-      {/* Actions */}
+   
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
         <button
           onClick={() => onEdit(task)}

@@ -22,7 +22,7 @@ export default function Login() {
     try {
       const res = await axios.post('/api/auth/login', form, {
         headers: { 'Content-Type': 'application/json' },
-        withCredentials: true, // if you are using cookies for JWT
+        withCredentials: true,
       });
 
       if (res.status === 200) {
@@ -33,10 +33,10 @@ export default function Login() {
         // Server responded with status code out of 2xx range
         setError(err.response.data.message || 'Invalid email or password');
       } else if (err.request) {
-        // Request made but no response
+        
         setError('No response from server. Please try again later.');
       } else {
-        // Something else
+        
         setError('Something went wrong. Please try again.');
       }
       console.error('Login error:', err);

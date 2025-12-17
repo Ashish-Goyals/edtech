@@ -15,12 +15,11 @@ export default function Dashboard() {
   const [editing, setEditing] = useState<Task | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  /* 🔄 Load tasks */
+
   const loadTasks = async () => {
     try {
       const res = await api.get<Task[]>("/api/task");
 
-      // normalize _id
       const normalized = res.data.map((t) => ({
         ...t,
         _id: String(t._id),
@@ -32,7 +31,7 @@ export default function Dashboard() {
     }
   };
 
-  /* 🔄 Load user + tasks */
+  
   useEffect(() => {
     (async () => {
       await loadTasks();
@@ -45,13 +44,12 @@ export default function Dashboard() {
     })();
   }, []);
 
-  /* ➕ Create */
   const createTask = async (data: TaskFormData) => {
     await api.post("/api/task", data);
     await loadTasks();
   };
 
-  /* ✏️ Update (FIXED) */
+  
   const updateTask = async (data: TaskFormData) => {
     if (!data._id) return; // ✅ required
 
@@ -60,7 +58,6 @@ export default function Dashboard() {
     await loadTasks();
   };
 
-  /* 🗑 Delete */
   const deleteTask = async (id: string) => {
     await api.delete(`/api/task/${id}`);
     await loadTasks();
@@ -70,10 +67,10 @@ export default function Dashboard() {
     <div className="p-6">
       <h2 className="text-2xl mb-4">Dashboard</h2>
 
-      {/* Create */}
+     
       <TaskForm submitLabel="Add Task" onSubmit={createTask} />
 
-      {/* List */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {tasks.map((task) => (
           <TaskCard
@@ -86,14 +83,14 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Edit Modal */}
+   
       {editing && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white p-4 rounded max-w-xl w-full">
             <TaskForm
               initial={editing}
               submitLabel="Update"
-              onSubmit={updateTask} // ✅ FIXED
+              onSubmit={updateTask} 
             />
 
             <div className="text-right mt-3">

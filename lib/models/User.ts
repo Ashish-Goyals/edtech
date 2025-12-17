@@ -36,14 +36,14 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-/* 🔐 Password hashing (Mongoose v7 compatible) */
+
 UserSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-/* 🔑 Password compare */
+
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {

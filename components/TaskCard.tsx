@@ -1,5 +1,6 @@
-import React from "react";
+"use client";
 
+import React from "react";
 
 export interface Task {
   _id: string;
@@ -7,7 +8,6 @@ export interface Task {
   description?: string;
   createdAt?: string;
 }
-
 
 interface TaskCardProps {
   task: Task;
@@ -21,7 +21,7 @@ export default function TaskCard({
   onEdit,
   onDelete,
   isAdmin,
-}: TaskCardProps): JSX.Element {
+}: TaskCardProps) {
   return (
     <article className="group relative w-full rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md">
       {/* Title */}

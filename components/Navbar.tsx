@@ -15,7 +15,7 @@ interface MeResponse {
   user: User | null;
 }
 
-export default function Navbar(): JSX.Element {
+export default function Navbar(){
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 

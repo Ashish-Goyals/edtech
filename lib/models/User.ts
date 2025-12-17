@@ -1,8 +1,8 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Model, Types } from "mongoose";
 import bcrypt from "bcryptjs";
 
-
-export interface IUser extends Document {
+export interface IUser {
+  _id: Types.ObjectId;
   name?: string;
   email: string;
   password: string;
@@ -10,8 +10,7 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-
-const UserSchema: Schema<IUser> = new Schema(
+const UserSchema = new Schema<IUser>(
   {
     name: {
       type: String,
@@ -37,23 +36,19 @@ const UserSchema: Schema<IUser> = new Schema(
   { timestamps: true }
 );
 
-
-UserSchema.pre<IUser>("save", async function (next) {
-  if (!this.isModified("password")) {
-    return next();
-  }
+/* 🔐 Password hashing (Mongoose v7 compatible) */
+UserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
-
+/* 🔑 Password compare */
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
-
 
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

@@ -10,7 +10,7 @@ interface Task {
   createdAt?: string;
 }
 
-export default function Home(): JSX.Element {
+export default function Home() {
   const [data, setData] = useState<Task[]>([]);
 
   useEffect(() => {

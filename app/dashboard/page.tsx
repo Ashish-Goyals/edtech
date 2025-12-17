@@ -1,99 +1,104 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import TaskForm from "../../components/TaskForm";
-import TaskCard from "../../components/TaskCard";
-import { ITask } from "@/lib/models/Task"; 
-import { IUser } from "@/lib/models/User";
+import TaskForm, { TaskFormData } from "@/components/TaskForm";
+import TaskCard, { Task } from "@/components/TaskCard";
+
+interface User {
+  _id: string;
+  role: "user" | "admin";
+}
 
 export default function Dashboard() {
-  const [resources, setResources] = useState<ITask[]>([]);
-  const [editing, setEditing] = useState<ITask | null>(null);
-  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [editing, setEditing] = useState<Task | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const load = async () => {
+  /* 🔄 Load tasks */
+  const loadTasks = async () => {
     try {
-      const res = await api.get("/api/task");
-      setResources(res.data || []);
-    } catch (e) {
-      console.error("Failed to load tasks", e);
-      setResources([]);
+      const res = await api.get<Task[]>("/api/task");
+
+      // normalize _id
+      const normalized = res.data.map((t) => ({
+        ...t,
+        _id: String(t._id),
+      }));
+
+      setTasks(normalized);
+    } catch {
+      setTasks([]);
     }
   };
 
+  /* 🔄 Load user + tasks */
   useEffect(() => {
     (async () => {
-      await load();
+      await loadTasks();
       try {
-        const me = await api.get("/api/auth/me");
-        setCurrentUser(me.data?.user || null);
-      } catch (e) {
+        const me = await api.get<{ user: User | null }>("/api/auth/me");
+        setCurrentUser(me.data?.user ?? null);
+      } catch {
         setCurrentUser(null);
       }
     })();
   }, []);
 
-  const create = async (data: Partial<ITask>) => {
-    try {
-      await api.post("/api/task", data);
-      await load();
-    } catch (e) {
-      console.error("Create failed", e);
-    }
+  /* ➕ Create */
+  const createTask = async (data: TaskFormData) => {
+    await api.post("/api/task", data);
+    await loadTasks();
   };
 
-  const update = async (data: ITask) => {
-    if (!data?._id) return;
-    try {
-      await api.put(`/api/task/${data._id}`, data);
-      setEditing(null);
-      await load();
-    } catch (e) {
-      console.error("Update failed", e);
-    }
+  /* ✏️ Update (FIXED) */
+  const updateTask = async (data: TaskFormData) => {
+    if (!data._id) return; // ✅ required
+
+    await api.put(`/api/task/${data._id}`, data);
+    setEditing(null);
+    await loadTasks();
   };
 
-  const del = async (id: string) => {
-    try {
-      await api.delete(`/api/task/${id}`);
-      await load();
-    } catch (e) {
-      console.error("Delete failed", e);
-    }
+  /* 🗑 Delete */
+  const deleteTask = async (id: string) => {
+    await api.delete(`/api/task/${id}`);
+    await loadTasks();
   };
 
   return (
     <div className="p-6">
       <h2 className="text-2xl mb-4">Dashboard</h2>
 
-      <div className="mb-6">
-        <TaskForm key={"new"} submitLabel="Add Task" onSubmit={create} />
-      </div>
+      {/* Create */}
+      <TaskForm submitLabel="Add Task" onSubmit={createTask} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {resources.map((r) => (
+      {/* List */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        {tasks.map((task) => (
           <TaskCard
-            key={r._id}
-            task={r}
+            key={task._id}
+            task={task}
             onEdit={setEditing}
-            onDelete={del}
+            onDelete={deleteTask}
             isAdmin={currentUser?.role === "admin"}
           />
         ))}
       </div>
 
+      {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-xl">
+          <div className="bg-white p-4 rounded max-w-xl w-full">
             <TaskForm
-              key={editing._id}
               initial={editing}
               submitLabel="Update"
-              onSubmit={update}
+              onSubmit={updateTask} // ✅ FIXED
             />
-            <div className="mt-2 text-right">
+
+            <div className="text-right mt-3">
               <button
-                className="btn bg-gray-300 text-black"
+                className="px-4 py-2 bg-gray-300 rounded"
                 onClick={() => setEditing(null)}
               >
                 Cancel
